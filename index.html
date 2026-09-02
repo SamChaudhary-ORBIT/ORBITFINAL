@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#14162B" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/orbit-192.png" type="image/png" />
+<link rel="apple-touch-icon" href="icons/orbit-192.png" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<title>Orbit — LifeOS for students</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14162B;
+    --surface: #1F2142;
+    --surface-2: #262a52;
+    --border: #33366a;
+    --text: #EDEBFF;
+    --text-dim: #9a9bc4;
+    --school: #5B8DEF;
+    --sports: #FF8A5B;
+    --hobby: #4CD9A0;
+    --rest: #B98EFF;
+    --warn: #FF8A5B;
+    --danger: #FF6B6B;
+    --radius: 14px;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 80px;
+  }
+  .wrap{ max-width: 640px; margin: 0 auto; }
+  button{ font-family:'Inter'; }
+  button:focus-visible, input:focus-visible, select:focus-visible{
+    outline: 2px solid var(--hobby); outline-offset: 2px;
+  }
+
+  header{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+  .brand{ font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 22px; letter-spacing: -0.02em; }
+  .brand span{ color: var(--hobby); }
+  .tagline{ font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+  .header-right{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+  .header-btn-row{ display:flex; gap:6px; }
+  .tabbar{ display:flex; gap:6px; background: var(--surface); padding:4px; border-radius: 999px; }
+  .tabbar button{ border:none; background:transparent; color: var(--text-dim); padding: 8px 14px; border-radius: 999px; font-size:13px; font-weight:500; cursor:pointer; }
+  .tabbar button.active{ background: var(--text); color: var(--bg); }
+
+  .icon-btn{ border:1px solid var(--border); background: var(--surface); color: var(--text-dim); padding: 6px 10px; border-radius: 999px; font-size:11px; cursor:pointer; }
+  .icon-btn.on{ border-color: var(--hobby); color: var(--hobby); }
+
+  .weeknav{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 14px; flex-wrap:wrap; gap:8px; }
+  .weeknav .range{ font-size:12px; color: var(--text-dim); font-family:'JetBrains Mono', monospace; }
+  .weeknav .navbtns{ display:flex; gap:6px; }
+  .weeknav button{ border:1px solid var(--border); background: var(--surface); color: var(--text); padding: 5px 10px; border-radius: 8px; font-size:12px; cursor:pointer; }
+  .weeknav .today-btn{ color: var(--hobby); border-color: var(--hobby); }
+
+  .upnext{ display:none; background: var(--surface); border: 1px solid var(--hobby); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 18px; font-size: 13px; }
+  .upnext.show{ display:block; }
+  .upnext b{ color: var(--hobby); }
+
+  .daypills{ display:flex; gap:6px; margin-bottom: 22px; flex-wrap: wrap; }
+  .daypills button{ border:1px solid var(--border); background: var(--surface); color: var(--text-dim); padding: 7px 10px; border-radius: 999px; font-size: 12px; cursor:pointer; position: relative; text-align:center; min-width:48px; }
+  .daypills button .wd{ display:block; font-size:11px; }
+  .daypills button .dn{ display:block; font-size:13px; font-weight:600; margin-top:2px; }
+  .daypills button.active{ background: var(--hobby); color: #0a3324; border-color: var(--hobby); }
+  .daypills button.is-today::after{ content:''; position:absolute; top:4px; right:6px; width:5px; height:5px; border-radius:50%; background: var(--sports); }
+
+  .rail{ position:relative; padding-left: 26px; }
+  .rail::before{ content:''; position:absolute; left:5px; top:6px; bottom:6px; width:2px; background: var(--border); }
+  .block{ position:relative; margin-bottom:18px; }
+  .block .dot{ position:absolute; left:-26px; top:6px; width:12px; height:12px; border-radius:50%; border:2px solid var(--bg); }
+  .block .time{ font-family:'JetBrains Mono', monospace; font-size:11px; color: var(--text-dim); margin-bottom:4px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .badge{ font-family:'Inter'; font-size:10px; padding: 1px 7px; border-radius: 999px; border:1px solid var(--border); color: var(--text-dim); }
+  .badge.remind{ color: var(--hobby); border-color: var(--hobby); }
+  .badge.priority-high{ color: var(--danger); border-color: var(--danger); }
+  .badge.priority-medium{ color: var(--sports); border-color: var(--sports); }
+  .badge.priority-low{ color: var(--text-dim); border-color: var(--border); }
+  .badge.fixed{ color: var(--rest); border-color: var(--rest); }
+  .card{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding: 10px 14px; border-radius: var(--radius); cursor:pointer; border: 1px solid transparent; }
+  .card:hover{ border-color: var(--border); }
+  .block .title{ font-size:14px; font-weight:500; }
+  .block .cat{ font-size:11px; opacity:.75; text-transform: capitalize; }
+  .block .del, .block .resched{ background:none; border:none; color: inherit; opacity:.6; cursor:pointer; font-size:16px; line-height:1; padding:5px; }
+  .block .resched{ font-size:14px; }
+  .block .del:hover, .block .resched:hover{ opacity:1; }
+  .block .actions{ display:flex; align-items:center; gap:2px; }
+  .status-row{ display:flex; align-items:center; gap:8px; margin-top:6px; padding-left:14px; }
+  .status-row select{ background: var(--surface-2); border:1px solid var(--border); color: var(--text); font-size:11px; padding:4px 8px; border-radius:8px; }
+  .status-row select.done{ border-color: var(--hobby); color: var(--hobby); }
+  .status-row select.missed{ border-color: var(--danger); color: var(--danger); }
+  .status-row select.partial{ border-color: var(--sports); color: var(--sports); }
+
+  .empty{ color: var(--text-dim); font-size:14px; padding: 24px 0; }
+  .add-btn{ margin-top: 4px; width:100%; border: 1px dashed var(--border); background: transparent; color: var(--text-dim); padding: 12px; border-radius: var(--radius); font-size: 13px; cursor:pointer; }
+  .add-btn:hover{ border-color: var(--hobby); color: var(--hobby); }
+  .add-btn.secondary{ margin-top: 10px; }
+
+  .slot-btn{ width:100%; text-align:left; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 10px; font-size:13px; cursor:pointer; margin-bottom:8px; }
+  .slot-btn:hover{ border-color: var(--hobby); }
+  .slot-btn .d{ color: var(--hobby); font-weight:500; margin-right:6px; }
+  .no-slots{ font-size:13px; color: var(--text-dim); padding: 10px 0; }
+
+  .balance-row{ margin-bottom:16px; }
+  .balance-top{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; }
+  .balance-top .name{ text-transform:capitalize; color: var(--text-dim); }
+  .balance-top .hrs{ font-weight:500; }
+  .bar-track{ height:10px; border-radius:999px; background: var(--surface); overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:999px; }
+  .balance-total{ margin-top: 20px; padding: 14px 16px; background: var(--surface); border-radius: var(--radius); font-size: 13px; color: var(--text-dim); }
+  .balance-total b{ color: var(--text); }
+
+  /* Tasks */
+  .task-section-title{ font-size:12px; color: var(--text-dim); text-transform:uppercase; letter-spacing:.04em; margin: 18px 0 8px; }
+  .task-section-title:first-child{ margin-top:0; }
+  .task-row{ display:flex; align-items:flex-start; gap:10px; padding: 10px 12px; background: var(--surface); border-radius: var(--radius); margin-bottom:8px; }
+  .task-row.overdue{ border: 1px solid var(--danger); }
+  .task-check{ width:20px; height:20px; margin-top:2px; accent-color: var(--hobby); cursor:pointer; flex-shrink:0; }
+  .task-body{ flex:1; }
+  .task-title{ font-size:14px; font-weight:500; }
+  .task-title.done{ text-decoration: line-through; color: var(--text-dim); }
+  .task-meta{ font-size:11px; color: var(--text-dim); margin-top:3px; display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .task-del{ background:none; border:none; color: var(--text-dim); cursor:pointer; font-size:16px; padding:4px; }
+  .task-del:hover{ color: var(--danger); }
+
+  .overlay{ position: fixed; inset:0; background: rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; padding: 20px; z-index: 10; overflow-y: auto; }
+  .overlay.show{ display:flex; }
+  .modal{ background: var(--surface); border-radius: 18px; padding: 22px; width: 100%; max-width: 420px; border: 1px solid var(--border); margin: auto; max-height: 88vh; overflow-y: auto; }
+  .modal h3{ margin:0 0 16px; font-family:'Space Grotesk'; font-size:16px; font-weight:600; }
+  .field{ margin-bottom: 14px; }
+  .field label{ display:block; font-size:12px; color: var(--text-dim); margin-bottom: 6px; }
+  .field input, .field select{ width:100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 10px; font-size:14px; }
+  .row2{ display:flex; gap:10px; }
+  .row2 .field{ flex:1; }
+  .pick{ display:flex; gap:8px; flex-wrap:wrap; }
+  .pick button{ border:1px solid var(--border); background: transparent; color: var(--text-dim); padding: 7px 12px; border-radius: 999px; font-size:12px; cursor:pointer; text-transform:capitalize; }
+  .pick button.sel{ color: var(--bg); font-weight:500; border-color: transparent; }
+  .pick button.sel.priority-high{ background: var(--danger); color:#3a0f0f; }
+  .pick button.sel.priority-medium{ background: var(--sports); color:#3a2408; }
+  .pick button.sel.priority-low{ background: var(--border); color: var(--text); }
+  .pick button.sel.type-fixed{ background: var(--rest); color:#221a3d; }
+  .pick button.sel.type-flexible{ background: var(--hobby); color:#0a3324; }
+  .hint{ font-size:11px; color: var(--text-dim); margin-top:6px; }
+  .conflict-warning{ display:none; background: rgba(255,138,91,0.12); border: 1px solid var(--warn); color: var(--warn); font-size:12px; padding: 8px 12px; border-radius: 10px; margin-bottom: 14px; }
+  .conflict-warning.show{ display:block; }
+  .modal-actions{ display:flex; gap:10px; margin-top: 18px; }
+  .modal-actions button{ flex:1; padding: 10px; border-radius: 10px; border:1px solid var(--border); background: transparent; color: var(--text); font-size:13px; cursor:pointer; }
+  .modal-actions .save{ background: var(--hobby); color:#0a3324; border-color: var(--hobby); font-weight:500; }
+  .delete-series{ width:100%; margin-top:10px; background:transparent; border:1px solid var(--danger); color:var(--danger); padding:9px; border-radius:10px; font-size:12px; cursor:pointer; }
+  .error{ font-size:12px; color: var(--danger); margin-top:6px; display:none; }
+  .settings-actions{ display:flex; flex-direction:column; gap:10px; margin-top: 6px; }
+  .settings-actions button, .settings-actions label.file-btn{
+    display:block; text-align:center; padding: 10px; border-radius: 10px; border:1px solid var(--border);
+    background: var(--surface-2); color: var(--text); font-size:13px; cursor:pointer;
+  }
+  .settings-actions input[type=file]{ display:none; }
+
+  .toast{ position: fixed; left:50%; bottom: 22px; transform: translateX(-50%); background: var(--surface-2); border:1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 12px; font-size:13px; display:none; align-items:center; gap:14px; z-index: 20; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+  .toast.show{ display:flex; }
+  .toast button{ background: none; border:none; color: var(--hobby); font-weight:600; cursor:pointer; font-size:13px; }
+
+  .sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+
+  @media (max-width: 460px){
+    header{ flex-direction: column; }
+    .header-right{ align-items:flex-start; width:100%; }
+    .daypills button{ min-width: 40px; padding: 6px 6px; }
+    .modal{ padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="brand">Orbit<span>.</span></div>
+      <div class="tagline">your school, sport and hobby time, in one place</div>
+    </div>
+    <div class="header-right">
+      <div class="header-btn-row">
+        <div class="tabbar" role="tablist">
+          <button id="tab-day" role="tab" aria-selected="true" class="active">Today</button>
+          <button id="tab-tasks" role="tab" aria-selected="false">Tasks</button>
+          <button id="tab-balance" role="tab" aria-selected="false">Balance</button>
+        </div>
+      </div>
+      <div class="header-btn-row">
+        <button class="icon-btn" id="bell-btn" aria-label="Enable browser reminders">Enable reminders</button>
+        <button class="icon-btn" id="install-btn" aria-label="Install Orbit" style="display:none;">Install Orbit</button>
+        <button class="icon-btn" id="settings-btn" aria-label="Open settings">Settings</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="weeknav" id="weeknav-bar">
+    <div class="navbtns">
+      <button id="week-prev" aria-label="Previous week">&larr;</button>
+      <button class="today-btn" id="week-today">Today</button>
+      <button id="week-next" aria-label="Next week">&rarr;</button>
+    </div>
+    <div class="range" id="week-range"></div>
+  </div>
+
+  <div class="upnext" id="upnext" aria-live="polite"></div>
+
+  <div id="daypills" class="daypills"></div>
+
+  <div id="dayview"></div>
+  <div id="tasksview" style="display:none;"></div>
+  <div id="balanceview" style="display:none;"></div>
+
+</div>
+
+<!-- Add/Edit block modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="modal-title">Add a block</h3>
+    <div class="field">
+      <label for="f-title">What is it?</label>
+      <input id="f-title" placeholder="e.g. Allen tuition" />
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="f-start">Start time</label>
+        <input id="f-start" type="time" />
+      </div>
+      <div class="field">
+        <label for="f-end">End time</label>
+        <input id="f-end" type="time" />
+      </div>
+    </div>
+    <div class="conflict-warning" id="conflict-warning" role="alert"></div>
+    <div class="field">
+      <label>Category</label>
+      <div class="pick" id="cat-pick"></div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Priority</label>
+        <div class="pick" id="priority-pick"></div>
+      </div>
+      <div class="field">
+        <label>Type</label>
+        <div class="pick" id="type-pick"></div>
+      </div>
+    </div>
+    <div class="field" id="repeat-field">
+      <label>Which days does this happen? (every week)</label>
+      <div class="pick" id="repeat-pick"></div>
+      <div class="hint">Pick every day it repeats — same time slot, every week.</div>
+    </div>
+    <div class="field">
+      <label for="f-remind">Remind me</label>
+      <select id="f-remind">
+        <option value="0">No reminder</option>
+        <option value="5">5 minutes before</option>
+        <option value="10" selected>10 minutes before</option>
+        <option value="15">15 minutes before</option>
+        <option value="30">30 minutes before</option>
+      </select>
+    </div>
+    <div class="error" id="form-error"></div>
+    <div class="modal-actions">
+      <button id="cancel-btn">Cancel</button>
+      <button class="save" id="save-btn">Save</button>
+    </div>
+    <button class="delete-series" id="delete-series-btn" style="display:none;">Remove this activity from all its days</button>
+  </div>
+</div>
+
+<!-- Reschedule modal -->
+<div class="overlay" id="reschedule-overlay">
+  <div class="modal">
+    <h3>Reschedule "<span id="resched-title"></span>"</h3>
+    <div class="conflict-warning show" id="resched-fixed-warning" style="display:none;">This activity is marked <b>fixed</b> — moving it may affect other plans built around it.</div>
+    <div class="hint" id="resched-sub" style="margin-bottom:14px;"></div>
+    <div id="resched-slots"></div>
+    <div class="modal-actions">
+      <button id="resched-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Find a time modal -->
+<div class="overlay" id="find-overlay">
+  <div class="modal">
+    <h3>Find a time</h3>
+    <div class="field">
+      <label for="ft-title">What do you want to do?</label>
+      <input id="ft-title" placeholder="e.g. Revise chemistry" />
+    </div>
+    <div class="field">
+      <label for="ft-duration">How long will it take?</label>
+      <select id="ft-duration">
+        <option value="30">30 minutes</option>
+        <option value="45">45 minutes</option>
+        <option value="60" selected>1 hour</option>
+        <option value="90">1.5 hours</option>
+        <option value="120">2 hours</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Category</label>
+      <div class="pick" id="ft-cat-pick"></div>
+    </div>
+    <button class="add-btn" id="ft-search-btn" style="margin-bottom:14px;">Show me free slots this week</button>
+    <div id="ft-slots"></div>
+    <div class="modal-actions">
+      <button id="ft-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Task modal -->
+<div class="overlay" id="task-overlay">
+  <div class="modal">
+    <h3>Add a task</h3>
+    <div class="field">
+      <label for="tk-title">Task</label>
+      <input id="tk-title" placeholder="e.g. Maths worksheet ch.4" />
+    </div>
+    <div class="field">
+      <label for="tk-due">Due date</label>
+      <input id="tk-due" type="date" />
+    </div>
+    <div class="field">
+      <label>Category</label>
+      <div class="pick" id="tk-cat-pick"></div>
+    </div>
+    <div class="field">
+      <label>Priority</label>
+      <div class="pick" id="tk-priority-pick"></div>
+    </div>
+    <div class="field">
+      <label for="tk-duration">Estimated time needed</label>
+      <select id="tk-duration">
+        <option value="20">20 minutes</option>
+        <option value="30">30 minutes</option>
+        <option value="45">45 minutes</option>
+        <option value="60" selected>1 hour</option>
+        <option value="90">1.5 hours</option>
+        <option value="120">2 hours</option>
+        <option value="150">2.5 hours</option>
+        <option value="180">3 hours</option>
+        <option value="240">4 hours</option>
+      </select>
+    </div>
+    <div class="field">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+        <input type="checkbox" id="tk-repeat" style="width:auto;" />
+        Repeats weekly on this weekday
+      </label>
+    </div>
+    <div class="error" id="task-error"></div>
+    <div class="modal-actions">
+      <button id="tk-cancel">Cancel</button>
+      <button class="save" id="tk-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Plan a single task modal -->
+<div class="overlay" id="plan-overlay">
+  <div class="modal">
+    <h3>Plan: <span id="plan-title"></span></h3>
+    <div class="hint" id="plan-summary" style="margin-bottom:10px;"></div>
+    <div class="field">
+      <label for="plan-until">Plan sessions up to</label>
+      <input id="plan-until" type="date" />
+    </div>
+    <button class="add-btn" id="plan-suggest-btn" style="margin-bottom:14px;">Suggest a plan</button>
+    <div id="plan-results"></div>
+    <div class="modal-actions">
+      <button id="plan-cancel">Cancel</button>
+      <button class="save" id="plan-add-btn" style="display:none;">Add to schedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- Auto-plan summary modal -->
+<div class="overlay" id="autoplan-overlay">
+  <div class="modal">
+    <h3>Auto-plan results</h3>
+    <div id="autoplan-results"></div>
+    <div class="modal-actions">
+      <button id="autoplan-close">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div class="overlay" id="settings-overlay">
+  <div class="modal">
+    <h3>Settings</h3>
+    <div class="row2">
+      <div class="field">
+        <label for="st-start">Your day starts at</label>
+        <input id="st-start" type="time" />
+      </div>
+      <div class="field">
+        <label for="st-end">Your day ends at</label>
+        <input id="st-end" type="time" />
+      </div>
+    </div>
+    <div class="field">
+      <label for="st-buffer">Minimum gap between activities</label>
+      <select id="st-buffer">
+        <option value="0">No gap required</option>
+        <option value="5">5 minutes</option>
+        <option value="10" selected>10 minutes</option>
+        <option value="15">15 minutes</option>
+        <option value="30">30 minutes</option>
+      </select>
+      <div class="hint">Used as a rough stand-in for travel/transition time between activities — not a real travel-time calculation.</div>
+    </div>
+    <div class="settings-actions">
+      <button id="st-save">Save settings</button>
+      <button id="st-export">Export backup (.json)</button>
+      <label class="file-btn" for="st-import">Import backup (.json)</label>
+      <input type="file" id="st-import" accept="application/json" />
+    </div>
+    <div class="modal-actions">
+      <button id="st-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" aria-live="polite">
+  <span id="toast-msg"></span>
+  <button id="toast-undo">Undo</button>
+</div>
+
+<script>
+const CATS = { school:{color:'var(--school)'}, sports:{color:'var(--sports)'}, hobby:{color:'var(--hobby)'}, rest:{color:'var(--rest)'} };
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const RULES_KEY='orbit-rules-v4', EXC_KEY='orbit-exceptions-v4', ONEOFF_KEY='orbit-oneoffs-v4',
+      FIRED_KEY='orbit-fired-v4', TASKS_KEY='orbit-tasks-v4', STATUS_KEY='orbit-status-v4', SETTINGS_KEY='orbit-settings-v4';
+
+function cid(){ return Math.random().toString(36).slice(2,9); }
+function pad(n){ return String(n).padStart(2,'0'); }
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+function formatDateStr(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function getMonday(d){ const jsDay=d.getDay(); return addDays(d, -((jsDay+6)%7)); }
+function weekdayName(d){ return DAYS[(d.getDay()+6)%7]; }
+function dateLabel(d){ return MONTHS[d.getMonth()]+' '+d.getDate(); }
+function toMinutes(t){ const [h,m]=t.split(':').map(Number); return h*60+m; }
+function minutesToTime(m){ return pad(Math.floor(m/60))+':'+pad(m%60); }
+function fmt(t){ const [h,m]=t.split(':').map(Number); const ampm=h>=12?'pm':'am'; const h12=((h+11)%12)+1; return h12+(m?':'+pad(m):'')+ampm; }
+
+function loadJSON(key, fallback){ const raw=localStorage.getItem(key); if(raw){ try{ return JSON.parse(raw); }catch(e){} } return fallback; }
+
+function makeDefaultRules(){
+  // Fresh installs start empty — no personal sample data ships in the file,
+  // so nothing you add here ever shows up for someone else who opens this file.
+  return { Mon:[], Tue:[], Wed:[], Thu:[], Fri:[], Sat:[], Sun:[] };
+}
+
+let rules = loadJSON(RULES_KEY, null) || makeDefaultRules();
+let exceptions = loadJSON(EXC_KEY, {});
+let oneOffs = loadJSON(ONEOFF_KEY, []);
+let firedToday = loadJSON(FIRED_KEY, {});
+let tasks = loadJSON(TASKS_KEY, []);
+let statuses = loadJSON(STATUS_KEY, {});
+let settings = loadJSON(SETTINGS_KEY, { dayStart:'06:00', dayEnd:'22:00', buffer:10 });
+
+function saveRules(){ localStorage.setItem(RULES_KEY, JSON.stringify(rules)); }
+function saveExceptions(){ localStorage.setItem(EXC_KEY, JSON.stringify(exceptions)); }
+function saveOneOffs(){ localStorage.setItem(ONEOFF_KEY, JSON.stringify(oneOffs)); }
+function saveFired(){ localStorage.setItem(FIRED_KEY, JSON.stringify(firedToday)); }
+function saveTasks(){ localStorage.setItem(TASKS_KEY, JSON.stringify(tasks)); }
+function saveStatuses(){ localStorage.setItem(STATUS_KEY, JSON.stringify(statuses)); }
+function saveSettings(){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+
+function seriesDays(seriesId){ return DAYS.filter(d => rules[d].some(b=>b.seriesId===seriesId)); }
+
+function getOccurrencesForDate(dateObj){
+  const wd = weekdayName(dateObj), dateStr = formatDateStr(dateObj);
+  const occ = [];
+  (rules[wd]||[]).forEach(b=>{
+    const ex = exceptions[dateStr] && exceptions[dateStr][b.seriesId];
+    if(ex && ex.type==='skip') return;
+    occ.push({ ...b, date:dateStr, recurring:true, occKey:b.seriesId });
+  });
+  oneOffs.filter(o=>o.date===dateStr).forEach(o=> occ.push({ ...o, seriesId:null, recurring:false, occKey:o.id }));
+  return occ.sort((a,b)=> toMinutes(a.start)-toMinutes(b.start));
+}
+
+// ---- toast / undo ----
+const toastEl = document.getElementById('toast');
+const toastMsg = document.getElementById('toast-msg');
+const toastUndoBtn = document.getElementById('toast-undo');
+let undoFn = null, undoTimer = null;
+function showToast(message, fn){
+  clearTimeout(undoTimer);
+  toastMsg.textContent = message;
+  undoFn = fn;
+  toastEl.classList.add('show');
+  undoTimer = setTimeout(()=>{ toastEl.classList.remove('show'); undoFn=null; }, 6000);
+}
+toastUndoBtn.addEventListener('click', ()=>{
+  if(undoFn) undoFn();
+  toastEl.classList.remove('show');
+  clearTimeout(undoTimer);
+  undoFn = null;
+});
+
+// ---- week state ----
+let weekOffset = 0;
+let activeDayIndex = DAYS.indexOf(weekdayName(new Date()));
+let activeTab = 'day';
+
+function currentWeekDates(){ const monday=getMonday(new Date()); const base=addDays(monday, weekOffset*7); return DAYS.map((_,i)=>addDays(base,i)); }
+function activeDate(){ return currentWeekDates()[activeDayIndex]; }
+function todayStr(){ return formatDateStr(new Date()); }
+
+function renderWeekRange(){
+  const dates = currentWeekDates();
+  document.getElementById('week-range').textContent = dateLabel(dates[0])+' – '+dateLabel(dates[6])+', '+dates[0].getFullYear();
+}
+document.getElementById('week-prev').addEventListener('click', ()=>{ weekOffset--; refreshAll(); });
+document.getElementById('week-next').addEventListener('click', ()=>{ weekOffset++; refreshAll(); });
+document.getElementById('week-today').addEventListener('click', ()=>{ weekOffset=0; activeDayIndex=DAYS.indexOf(weekdayName(new Date())); refreshAll(); });
+
+function renderDayPills(){
+  const dates = currentWeekDates(); const tStr = todayStr();
+  const el = document.getElementById('daypills');
+  el.innerHTML = dates.map((d,i)=>{
+    const isToday = formatDateStr(d)===tStr, isActive = i===activeDayIndex;
+    return `<button class="${isActive?'active':''} ${isToday?'is-today':''}" data-idx="${i}" aria-pressed="${isActive}">
+      <span class="wd">${DAYS[i]}</span><span class="dn">${d.getDate()}</span></button>`;
+  }).join('');
+  el.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ activeDayIndex=Number(btn.dataset.idx); renderDayPills(); renderDayView(); });
+  });
+}
+
+function renderUpNext(){
+  const el = document.getElementById('upnext');
+  if(activeTab!=='day' || formatDateStr(activeDate())!==todayStr()){ el.classList.remove('show'); return; }
+  const now=new Date(); const nowMin=now.getHours()*60+now.getMinutes();
+  const upcoming = getOccurrencesForDate(activeDate()).filter(b=>toMinutes(b.start)>nowMin)[0];
+  if(!upcoming){ el.classList.remove('show'); return; }
+  el.innerHTML = `Up next: <b>${escapeHtml(upcoming.title)}</b> at ${fmt(upcoming.start)} — in ${toMinutes(upcoming.start)-nowMin} min`;
+  el.classList.add('show');
+}
+
+function statusFor(dateStr, occKey){ return (statuses[dateStr] && statuses[dateStr][occKey]) || 'none'; }
+function setStatus(dateStr, occKey, val){
+  if(!statuses[dateStr]) statuses[dateStr] = {};
+  if(val==='none') delete statuses[dateStr][occKey]; else statuses[dateStr][occKey] = val;
+  saveStatuses();
+}
+
+function renderDayView(){
+  const el = document.getElementById('dayview');
+  const d = activeDate();
+  const dateStr = formatDateStr(d);
+  const blocks = getOccurrencesForDate(d);
+  const dayLabel = DAYS[activeDayIndex]+', '+dateLabel(d);
+  const dayTotalHrs = Math.round(blocks.reduce((sum,b)=> sum+(toMinutes(b.end)-toMinutes(b.start)),0)/6)/10;
+
+  if(blocks.length===0){
+    el.innerHTML = `<div class="empty">Nothing planned for ${dayLabel} yet. Tap below to add your first activity — everything you add stays only on this device.</div>
+      <button class="add-btn" id="add-btn">+ Add a block</button>
+      <button class="add-btn secondary" id="find-time-btn">Find a time to do something</button>`;
+  } else {
+    let html = `<div class="hint" style="margin-bottom:10px;">${dayLabel} — ${dayTotalHrs} hrs scheduled</div><div class="rail">`;
+    blocks.forEach(b=>{
+      const c = CATS[b.cat];
+      const days = b.recurring ? seriesDays(b.seriesId) : [];
+      const repeatLabel = days.length>1 ? days.join(', ') : (b.recurring ? '' : 'one-off');
+      const st = statusFor(dateStr, b.occKey);
+      html += `<div class="block">
+        <div class="dot" style="background:${c.color}"></div>
+        <div class="time">
+          <span>${fmt(b.start)} – ${fmt(b.end)}</span>
+          ${repeatLabel ? `<span class="badge">${repeatLabel}</span>` : ''}
+          ${b.remind>0 ? `<span class="badge remind">${b.remind}m reminder</span>` : ''}
+          <span class="badge priority-${b.priority}">${b.priority} priority</span>
+          <span class="badge ${b.ptype==='fixed'?'fixed':''}">${b.ptype}</span>
+        </div>
+        <div class="card" style="background:${c.color}22;" data-id="${b.id}" data-recurring="${b.recurring}" role="button" tabindex="0" aria-label="${escapeHtml(b.title)}, ${b.cat} category, ${fmt(b.start)} to ${fmt(b.end)}">
+          <div>
+            <div class="title">${escapeHtml(b.title)}</div>
+            <div class="cat" style="color:${c.color}">${b.cat}</div>
+          </div>
+          <div class="actions">
+            <button class="resched" data-resched="${b.id}" data-recurring="${b.recurring}" aria-label="Reschedule ${escapeHtml(b.title)}">&#8646;</button>
+            <button class="del" data-del="${b.id}" data-recurring="${b.recurring}" aria-label="Delete ${escapeHtml(b.title)}">&times;</button>
+          </div>
+        </div>
+        <div class="status-row">
+          <label class="sr-only" for="status-${b.id}">Status for ${escapeHtml(b.title)}</label>
+          <select id="status-${b.id}" class="${st}" data-statusfor="${b.occKey}">
+            <option value="none" ${st==='none'?'selected':''}>No status</option>
+            <option value="done" ${st==='done'?'selected':''}>Done</option>
+            <option value="missed" ${st==='missed'?'selected':''}>Missed</option>
+            <option value="partial" ${st==='partial'?'selected':''}>Partial</option>
+          </select>
+        </div>
+      </div>`;
+    });
+    html += '</div><button class="add-btn" id="add-btn">+ Add a block</button>';
+    html += '<button class="add-btn secondary" id="find-time-btn">Find a time to do something</button>';
+    el.innerHTML = html;
+  }
+
+  el.querySelectorAll('[data-id]').forEach(card=>{
+    const openIt = ()=> openModal(card.dataset.id, card.dataset.recurring==='true');
+    card.addEventListener('click', (e)=>{ if(e.target.closest('[data-del],[data-resched]')) return; openIt(); });
+    card.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); openIt(); } });
+  });
+  el.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const isRecurring = btn.dataset.recurring==='true';
+      const b = getOccurrencesForDate(d).find(x=>x.id===btn.dataset.del);
+      if(isRecurring){
+        if(!exceptions[dateStr]) exceptions[dateStr]={};
+        exceptions[dateStr][b.seriesId] = { type:'skip' };
+        saveExceptions();
+        showToast('Removed just this occurrence.', ()=>{ delete exceptions[dateStr][b.seriesId]; saveExceptions(); renderDayView(); });
+      } else {
+        oneOffs = oneOffs.filter(o=>o.id!==btn.dataset.del);
+        saveOneOffs();
+        showToast('Deleted.', ()=>{ oneOffs.push(b); saveOneOffs(); renderDayView(); });
+      }
+      renderDayView();
+    });
+  });
+  el.querySelectorAll('[data-resched]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{ e.stopPropagation(); openRescheduleModal(btn.dataset.resched, btn.dataset.recurring==='true'); });
+  });
+  el.querySelectorAll('[data-statusfor]').forEach(sel=>{
+    sel.addEventListener('click', e=> e.stopPropagation());
+    sel.addEventListener('change', ()=>{
+      setStatus(dateStr, sel.dataset.statusfor, sel.value);
+      sel.className = sel.value;
+    });
+  });
+  const addBtn = document.getElementById('add-btn'); if(addBtn) addBtn.addEventListener('click', ()=>openModal(null,false));
+  const findBtn = document.getElementById('find-time-btn'); if(findBtn) findBtn.addEventListener('click', openFindTimeModal);
+  renderUpNext();
+}
+
+function computeWeeklyTotals(){
+  const totals = {school:0,sports:0,hobby:0,rest:0};
+  currentWeekDates().forEach(d=> getOccurrencesForDate(d).forEach(b=>{ totals[b.cat]+= (toMinutes(b.end)-toMinutes(b.start))/60; }));
+  return totals;
+}
+function renderBalanceView(){
+  const totals = computeWeeklyTotals();
+  const max = Math.max(...Object.values(totals),1);
+  const totalHrs = Object.values(totals).reduce((a,b)=>a+b,0);
+  const el = document.getElementById('balanceview');
+  let html='';
+  Object.keys(CATS).forEach(k=>{
+    const c=CATS[k], hrs=Math.round(totals[k]*10)/10, pct=Math.round((totals[k]/max)*100);
+    html += `<div class="balance-row"><div class="balance-top"><span class="name">${k}</span><span class="hrs">${hrs} hrs / week</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${c.color}"></div></div></div>`;
+  });
+  html += `<div class="balance-total">You've scheduled <b>${Math.round(totalHrs*10)/10} hrs</b> this actual week (skips and one-offs included). Remember: this counts hours, not whether the week actually feels balanced — that part is still your call.</div>`;
+  el.innerHTML = html;
+}
+
+// ---- tasks ----
+function taskOccursOn(task, dateStr, dayIdx){
+  if(!task.recurringWeekly) return task.dueDate === dateStr;
+  return dateStr >= task.dueDate && weekdayName(new Date(dateStr)) === weekdayName(new Date(task.dueDate));
+}
+function isTaskDoneOn(task, dateStr){
+  if(!task.recurringWeekly) return !!task.completed;
+  return !!(task.completedDates && task.completedDates[dateStr]);
+}
+function setTaskDoneOn(task, dateStr, val){
+  if(!task.recurringWeekly){ task.completed = val; }
+  else { if(!task.completedDates) task.completedDates={}; if(val) task.completedDates[dateStr]=true; else delete task.completedDates[dateStr]; }
+  saveTasks();
+}
+function renderTasksView(){
+  const el = document.getElementById('tasksview');
+  const today = new Date();
+  const windowDates = Array.from({length:14}, (_,i)=> addDays(today,i));
+  const tStr = todayStr();
+
+  const overdue = tasks.filter(t=> !t.recurringWeekly && t.dueDate < tStr && !t.completed);
+  const items = [];
+  windowDates.forEach(d=>{
+    const dateStr = formatDateStr(d);
+    tasks.forEach(t=>{
+      if(taskOccursOn(t, dateStr)){
+        items.push({ task:t, dateStr, isToday: dateStr===tStr });
+      }
+    });
+  });
+
+  let html = '<button class="add-btn" id="add-task-btn">+ Add a task</button>';
+  html += '<button class="add-btn secondary" id="autoplan-btn">Auto-plan all pending tasks</button>';
+  if(overdue.length){
+    html += '<div class="task-section-title">Overdue</div>';
+    overdue.forEach(t=> html += taskRowHtml(t, t.dueDate, true));
+  }
+  html += '<div class="task-section-title">Next 14 days</div>';
+  if(items.length===0){ html += '<div class="empty">No tasks in this window.</div>'; }
+  items.forEach(it=> html += taskRowHtml(it.task, it.dateStr, false));
+  el.innerHTML = html;
+
+  document.getElementById('add-task-btn').addEventListener('click', openTaskModal);
+  document.getElementById('autoplan-btn').addEventListener('click', runAutoPlanAll);
+  el.querySelectorAll('[data-plantask]').forEach(btn=>{
+    btn.addEventListener('click', ()=> openPlanModal(btn.dataset.plantask));
+  });
+  el.querySelectorAll('[data-taskcheck]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      const t = tasks.find(x=>x.id===cb.dataset.taskcheck);
+      setTaskDoneOn(t, cb.dataset.datestr, cb.checked);
+      renderTasksView();
+    });
+  });
+  el.querySelectorAll('[data-taskdel]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const removed = tasks.find(x=>x.id===btn.dataset.taskdel);
+      const idx = tasks.indexOf(removed);
+      tasks = tasks.filter(x=>x.id!==btn.dataset.taskdel);
+      saveTasks();
+      showToast('Task deleted.', ()=>{ tasks.splice(idx,0,removed); saveTasks(); renderTasksView(); });
+      renderTasksView();
+    });
+  });
+}
+function minutesLabel(m){ const h=Math.floor(m/60), mm=m%60; return (h?h+'h':'')+(mm?(h?' ':'')+mm+'m':'') || '0m'; }
+function taskPlannedMinutes(t){
+  return oneOffs.filter(o=> o.taskId===t.id && statusFor(o.date, o.id)!=='missed')
+    .reduce((sum,o)=> sum + (toMinutes(o.end)-toMinutes(o.start)), 0);
+}
+function taskRemainingMinutes(t){
+  return Math.max(0, (t.estimatedMinutes||60) - taskPlannedMinutes(t));
+}
+function taskRowHtml(t, dateStr, overdue){
+  const c = CATS[t.cat];
+  const done = isTaskDoneOn(t, dateStr);
+  const remaining = t.recurringWeekly ? 0 : taskRemainingMinutes(t);
+  const planned = t.recurringWeekly ? 0 : taskPlannedMinutes(t);
+  const needsPlan = !t.recurringWeekly && remaining > 0;
+  return `<div class="task-row ${overdue?'overdue':''}">
+    <input type="checkbox" class="task-check" data-taskcheck="${t.id}" data-datestr="${dateStr}" ${done?'checked':''} aria-label="Mark ${escapeHtml(t.title)} as done" />
+    <div class="task-body">
+      <div class="task-title ${done?'done':''}">${escapeHtml(t.title)}</div>
+      <div class="task-meta">
+        <span>${dateLabel(new Date(dateStr))}${overdue?' (overdue)':''}</span>
+        <span class="badge priority-${t.priority}">${t.priority}</span>
+        <span class="badge" style="color:${c.color}; border-color:${c.color};">${t.cat}</span>
+        ${t.recurringWeekly ? '<span class="badge">weekly</span>' : `<span class="badge">${minutesLabel(planned)} / ${minutesLabel(t.estimatedMinutes||60)} planned</span>`}
+      </div>
+      ${needsPlan ? `<button class="add-btn" style="margin-top:8px; padding:8px;" data-plantask="${t.id}">${overdue ? 'Replan' : (planned>0 ? 'Plan the rest' : 'Plan this task')}</button>` : ''}
+    </div>
+    <button class="task-del" data-taskdel="${t.id}" aria-label="Delete task ${escapeHtml(t.title)}">&times;</button>
+  </div>`;
+}
+
+const taskOverlay = document.getElementById('task-overlay');
+let tkCat='school', tkPriority='medium';
+function openTaskModal(){
+  document.getElementById('tk-title').value='';
+  document.getElementById('tk-due').value = todayStr();
+  document.getElementById('tk-repeat').checked = false;
+  document.getElementById('task-error').style.display='none';
+  tkCat='school'; tkPriority='medium';
+  renderTkCatPick(); renderTkPriorityPick();
+  taskOverlay.classList.add('show');
+}
+function renderTkCatPick(){
+  const elp = document.getElementById('tk-cat-pick');
+  elp.innerHTML = Object.keys(CATS).map(k=>`<button data-cat="${k}" class="${k===tkCat?'sel':''}" style="${k===tkCat?'background:'+CATS[k].color+';':''}">${k}</button>`).join('');
+  elp.querySelectorAll('button').forEach(btn=> btn.addEventListener('click', ()=>{ tkCat=btn.dataset.cat; renderTkCatPick(); }));
+}
+function renderTkPriorityPick(){
+  const elp = document.getElementById('tk-priority-pick');
+  elp.innerHTML = ['high','medium','low'].map(p=>`<button data-p="${p}" class="${p===tkPriority?'sel priority-'+p:''}">${p}</button>`).join('');
+  elp.querySelectorAll('button').forEach(btn=> btn.addEventListener('click', ()=>{ tkPriority=btn.dataset.p; renderTkPriorityPick(); }));
+}
+document.getElementById('tk-cancel').addEventListener('click', ()=> taskOverlay.classList.remove('show'));
+taskOverlay.addEventListener('click', e=>{ if(e.target===taskOverlay) taskOverlay.classList.remove('show'); });
+document.getElementById('tk-save').addEventListener('click', ()=>{
+  const title = document.getElementById('tk-title').value.trim();
+  const due = document.getElementById('tk-due').value;
+  const errEl = document.getElementById('task-error');
+  if(!title || !due){ errEl.textContent='Add a title and a due date.'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  tasks.push({ id:cid(), title, dueDate:due, cat:tkCat, priority:tkPriority,
+    estimatedMinutes: Number(document.getElementById('tk-duration').value),
+    recurringWeekly: document.getElementById('tk-repeat').checked, completed:false, completedDates:{} });
+  saveTasks();
+  taskOverlay.classList.remove('show');
+  renderTasksView();
+});
+
+function setTab(tab){
+  activeTab = tab;
+  ['day','tasks','balance'].forEach(t=>{
+    const btn = document.getElementById('tab-'+t);
+    btn.classList.toggle('active', t===tab);
+    btn.setAttribute('aria-selected', t===tab ? 'true':'false');
+  });
+  document.getElementById('weeknav-bar').style.display = tab==='tasks' ? 'none' : 'flex';
+  document.getElementById('daypills').style.display = tab==='day' ? 'flex' : 'none';
+  document.getElementById('dayview').style.display = tab==='day' ? 'block' : 'none';
+  document.getElementById('tasksview').style.display = tab==='tasks' ? 'block' : 'none';
+  document.getElementById('balanceview').style.display = tab==='balance' ? 'block' : 'none';
+  if(tab==='balance') renderBalanceView();
+  if(tab==='tasks') renderTasksView();
+  renderUpNext();
+}
+document.getElementById('tab-day').addEventListener('click', ()=>setTab('day'));
+document.getElementById('tab-tasks').addEventListener('click', ()=>setTab('tasks'));
+document.getElementById('tab-balance').addEventListener('click', ()=>setTab('balance'));
+
+function refreshAll(){ renderWeekRange(); renderDayPills(); renderDayView(); if(activeTab==='balance') renderBalanceView(); if(activeTab==='tasks') renderTasksView(); }
+
+// ---- reminders ----
+const bellBtn = document.getElementById('bell-btn');
+let notifPermission = (typeof Notification!=='undefined') ? Notification.permission : 'unsupported';
+function refreshBellBtn(){
+  if(notifPermission==='unsupported'){ bellBtn.textContent='Reminders unsupported'; bellBtn.disabled=true; }
+  else if(notifPermission==='granted'){ bellBtn.textContent='Reminders on'; bellBtn.classList.add('on'); }
+  else { bellBtn.textContent='Enable reminders'; bellBtn.classList.remove('on'); }
+}
+bellBtn.addEventListener('click', async ()=>{ if(notifPermission==='unsupported') return; notifPermission = await Notification.requestPermission(); refreshBellBtn(); });
+refreshBellBtn();
+function checkReminders(){
+  const now=new Date(); const dateStr=formatDateStr(now); const nowMin=now.getHours()*60+now.getMinutes();
+  getOccurrencesForDate(now).forEach(b=>{
+    if(!b.remind || b.remind<=0) return;
+    const fireAt = toMinutes(b.start)-b.remind; const key=dateStr+'-'+b.id;
+    if(nowMin>=fireAt && nowMin<toMinutes(b.start) && !firedToday[key]){
+      firedToday[key]=true; saveFired();
+      if(notifPermission==='granted') new Notification('Orbit reminder', { body: b.title+' starts at '+fmt(b.start) });
+      renderUpNext();
+    }
+  });
+}
+setInterval(checkReminders, 20000); checkReminders();
+
+// ---- conflict + free slot logic (respects settings buffer & working hours) ----
+function getBusyRanges(dateObj, excludeOccKey){
+  return getOccurrencesForDate(dateObj)
+    .filter(b => b.occKey !== excludeOccKey)
+    .map(b => ({ s: toMinutes(b.start), e: toMinutes(b.end), title:b.title }));
+}
+function findConflicts(dateObj, start, end, excludeOccKey){
+  const buffer = settings.buffer || 0;
+  const busy = getBusyRanges(dateObj, excludeOccKey);
+  return busy.filter(b => (start < b.e+buffer) && (end > b.s-buffer)).map(b=>b.title);
+}
+function computeFreeSlots(durationMin, opts){
+  opts = opts || {};
+  const buffer = settings.buffer || 0;
+  const dayStart = toMinutes(settings.dayStart||'06:00'), dayEnd = toMinutes(settings.dayEnd||'22:00');
+  const dates = currentWeekDates();
+  const ordered = dates.slice(activeDayIndex).concat(dates.slice(0, activeDayIndex));
+  const results = [];
+  ordered.forEach(d=>{
+    const dateStr = formatDateStr(d);
+    const busy = getBusyRanges(d, opts.excludeOccKey).sort((a,b)=>a.s-b.s);
+    let cursor = dayStart;
+    busy.forEach(b=>{
+      const gapEnd = b.s - buffer;
+      if(gapEnd - cursor >= durationMin) results.push({ dateStr, dayLabel: weekdayName(d)+' '+d.getDate(), start: cursor, end: cursor+durationMin });
+      cursor = Math.max(cursor, b.e + buffer);
+    });
+    if(dayEnd - cursor >= durationMin) results.push({ dateStr, dayLabel: weekdayName(d)+' '+d.getDate(), start: cursor, end: cursor+durationMin });
+  });
+  return results.slice(0,10);
+}
+function renderSlotButtons(container, slots, onPick){
+  if(slots.length===0){ container.innerHTML='<div class="no-slots">No free gaps that long this week — try a shorter duration, or widen your working hours in Settings.</div>'; return; }
+  container.innerHTML = slots.map((s,i)=>`<button class="slot-btn" data-idx="${i}"><span class="d">${s.dayLabel}</span>${fmt(minutesToTime(s.start))} – ${fmt(minutesToTime(s.end))}</button>`).join('');
+  container.querySelectorAll('.slot-btn').forEach(btn=> btn.addEventListener('click', ()=> onPick(slots[Number(btn.dataset.idx)])));
+}
+
+// ---- scheduling intelligence: task -> session planner ----
+const PREFERRED_START = 16*60; // 4pm — lean toward evening study windows
+const PREFERRED_END = 21*60;   // 9pm
+const MIN_CHUNK = 20;          // minutes; ignore slivers smaller than this
+const MAX_CHUNK = 90;          // minutes; split long workloads into sessions this size
+
+function dateRange(fromD, toD){
+  const arr=[]; let cur=new Date(fromD);
+  while(formatDateStr(cur) <= formatDateStr(toD)){ arr.push(new Date(cur)); cur=addDays(cur,1); }
+  return arr;
+}
+function getDayGaps(dateObj, extraBusy){
+  const buffer = settings.buffer||0;
+  const dayStart = toMinutes(settings.dayStart||'06:00'), dayEnd = toMinutes(settings.dayEnd||'22:00');
+  let busy = getBusyRanges(dateObj, null).map(b=>({s:b.s,e:b.e})).concat(extraBusy||[]);
+  busy.sort((a,b)=>a.s-b.s);
+  const gaps=[]; let cursor=dayStart;
+  busy.forEach(b=>{
+    const ge = b.s - buffer;
+    if(ge - cursor > 0) gaps.push({ s:cursor, e:ge });
+    cursor = Math.max(cursor, b.e + buffer);
+  });
+  if(dayEnd - cursor > 0) gaps.push({ s:cursor, e:dayEnd });
+  return gaps;
+}
+function gapPreferenceRank(gap){
+  const os = Math.max(gap.s, PREFERRED_START), oe = Math.min(gap.e, PREFERRED_END);
+  return -Math.max(0, oe-os); // more overlap with the evening window sorts first
+}
+function totalFreeMinutes(fromD, toD){
+  return dateRange(fromD, toD).reduce((sum,d)=> sum + getDayGaps(d,[]).reduce((s,g)=> s+(g.e-g.s),0), 0);
+}
+function planSessionsForRange(remainingMinutes, dates){
+  let remaining = remainingMinutes;
+  const sessions = [];
+  const reservedByDate = {};
+  const passes = [1,2]; // pass 1: one session/day; pass 2: fill any remaining leftover gaps
+  passes.forEach(pass=>{
+    dates.forEach(d=>{
+      if(remaining<=0) return;
+      const dateStr = formatDateStr(d);
+      let gaps = getDayGaps(d, reservedByDate[dateStr]||[]).sort((a,b)=> gapPreferenceRank(a)-gapPreferenceRank(b));
+      for(const g of gaps){
+        if(remaining<=0) break;
+        const gapLen = g.e-g.s;
+        if(gapLen < MIN_CHUNK) continue;
+        const take = Math.min(remaining, MAX_CHUNK, gapLen);
+        if(take < MIN_CHUNK) continue;
+        const os = Math.max(g.s, PREFERRED_START), oe = Math.min(g.e, PREFERRED_END);
+        const start = (oe-os >= take) ? os : g.s;
+        const end = start + take;
+        sessions.push({ dateStr, start, end });
+        if(!reservedByDate[dateStr]) reservedByDate[dateStr]=[];
+        reservedByDate[dateStr].push({ s:start, e:end });
+        remaining -= take;
+        if(pass===1) break; // only one chunk per day on the first pass
+      }
+    });
+  });
+  sessions.sort((a,b)=> a.dateStr===b.dateStr ? a.start-b.start : (a.dateStr<b.dateStr?-1:1));
+  return { sessions, remaining };
+}
+function planTaskSessions(remainingMinutes, fromDateObj, toDateObj){
+  const allDates = dateRange(fromDateObj, toDateObj);
+  if(allDates.length===0) return { sessions:[], remaining:remainingMinutes, bufferDays:0 };
+  let result, usedAllDates = false;
+  if(allDates.length > 1){
+    result = planSessionsForRange(remainingMinutes, allDates.slice(0,-1)); // try leaving the last day as buffer
+  } else {
+    result = { sessions:[], remaining:remainingMinutes };
+  }
+  if(result.remaining > 0){
+    result = planSessionsForRange(remainingMinutes, allDates);
+    usedAllDates = true;
+  }
+  let bufferDays = 0;
+  if(result.sessions.length){
+    const lastDateStr = result.sessions[result.sessions.length-1].dateStr;
+    const lastIdx = allDates.findIndex(d=> formatDateStr(d)===lastDateStr);
+    bufferDays = (allDates.length-1) - lastIdx;
+  }
+  return { sessions: result.sessions, remaining: result.remaining, bufferDays };
+}
+
+// ---- plan modal (single task) ----
+const planOverlay = document.getElementById('plan-overlay');
+let planningTask = null, lastPlanResult = null;
+function openPlanModal(taskId){
+  const t = tasks.find(x=>x.id===taskId);
+  if(!t) return;
+  planningTask = t;
+  document.getElementById('plan-title').textContent = t.title;
+  const isOverdue = t.dueDate < todayStr();
+  document.getElementById('plan-until').value = isOverdue ? formatDateStr(addDays(new Date(),2)) : t.dueDate;
+  document.getElementById('plan-results').innerHTML = '';
+  document.getElementById('plan-add-btn').style.display = 'none';
+  updatePlanSummary();
+  planOverlay.classList.add('show');
+}
+function updatePlanSummary(){
+  const t = planningTask;
+  const until = document.getElementById('plan-until').value || t.dueDate;
+  const remaining = taskRemainingMinutes(t);
+  const free = totalFreeMinutes(new Date(), new Date(until));
+  document.getElementById('plan-summary').textContent =
+    `Needs ${minutesLabel(remaining)} · roughly ${minutesLabel(free)} free between now and ${dateLabel(new Date(until))} · priority: ${t.priority}`;
+}
+document.getElementById('plan-until').addEventListener('change', updatePlanSummary);
+document.getElementById('plan-cancel').addEventListener('click', ()=> planOverlay.classList.remove('show'));
+planOverlay.addEventListener('click', e=>{ if(e.target===planOverlay) planOverlay.classList.remove('show'); });
+
+document.getElementById('plan-suggest-btn').addEventListener('click', ()=>{
+  const t = planningTask;
+  const until = document.getElementById('plan-until').value || t.dueDate;
+  const remaining = taskRemainingMinutes(t);
+  const result = planTaskSessions(remaining, new Date(), new Date(until));
+  lastPlanResult = { ...result, until };
+  const resEl = document.getElementById('plan-results');
+  if(result.sessions.length===0){
+    resEl.innerHTML = '<div class="no-slots">No free time found in this window — try extending the date in Settings working hours, or picking a later date above.</div>';
+    document.getElementById('plan-add-btn').style.display='none';
+    return;
+  }
+  let html = result.sessions.map(s=> `<div class="slot-btn" style="cursor:default;"><span class="d">${dateLabel(new Date(s.dateStr))}</span>${fmt(minutesToTime(s.start))} – ${fmt(minutesToTime(s.end))}</div>`).join('');
+  if(result.remaining > 0){
+    html += `<div class="conflict-warning show">Could only fit ${minutesLabel(remaining-result.remaining)} of the ${minutesLabel(remaining)} needed before this date — ${minutesLabel(result.remaining)} is left over. Consider a later date or freeing up time.</div>`;
+  } else {
+    html += `<div class="hint">This leaves ${result.bufferDays} day${result.bufferDays===1?'':'s'} of buffer before ${dateLabel(new Date(until))}.</div>`;
+  }
+  resEl.innerHTML = html;
+  document.getElementById('plan-add-btn').style.display = 'block';
+});
+
+document.getElementById('plan-add-btn').addEventListener('click', ()=>{
+  const t = planningTask;
+  if(!lastPlanResult || lastPlanResult.sessions.length===0) return;
+  const n = lastPlanResult.sessions.length;
+  lastPlanResult.sessions.forEach((s,i)=>{
+    oneOffs.push({
+      id: cid(), date: s.dateStr, start: minutesToTime(s.start), end: minutesToTime(s.end),
+      title: t.title + (n>1 ? ` (session ${i+1}/${n})` : ''), cat: t.cat, remind: 15,
+      priority: t.priority, ptype: 'flexible', taskId: t.id
+    });
+  });
+  saveOneOffs();
+  if(lastPlanResult.until && lastPlanResult.until !== t.dueDate){ t.dueDate = lastPlanResult.until; saveTasks(); }
+  planOverlay.classList.remove('show');
+  renderTasksView();
+  showToast(`Added ${n} session${n>1?'s':''} to your schedule.`, ()=>{
+    oneOffs = oneOffs.filter(o => !(o.taskId===t.id && lastPlanResult.sessions.some(s=> s.dateStr===o.date && minutesToTime(s.start)===o.start)));
+    saveOneOffs(); renderTasksView(); renderDayView();
+  });
+});
+
+// ---- auto-plan all pending tasks ----
+const autoplanOverlay = document.getElementById('autoplan-overlay');
+document.getElementById('autoplan-close').addEventListener('click', ()=> autoplanOverlay.classList.remove('show'));
+autoplanOverlay.addEventListener('click', e=>{ if(e.target===autoplanOverlay) autoplanOverlay.classList.remove('show'); });
+
+function runAutoPlanAll(){
+  const priorityRank = { high:0, medium:1, low:2 };
+  const pending = tasks
+    .filter(t=> !t.recurringWeekly && taskRemainingMinutes(t) > 0)
+    .sort((a,b)=> (a.dueDate!==b.dueDate ? (a.dueDate<b.dueDate?-1:1) : priorityRank[a.priority]-priorityRank[b.priority]));
+
+  if(pending.length===0){
+    document.getElementById('autoplan-results').innerHTML = '<div class="empty">Nothing needs planning right now.</div>';
+    autoplanOverlay.classList.add('show');
+    return;
+  }
+
+  const summary = [];
+  pending.forEach(t=>{
+    const remaining = taskRemainingMinutes(t);
+    const until = t.dueDate < todayStr() ? formatDateStr(addDays(new Date(),2)) : t.dueDate;
+    const result = planTaskSessions(remaining, new Date(), new Date(until));
+    const n = result.sessions.length;
+    result.sessions.forEach((s,i)=>{
+      oneOffs.push({ id:cid(), date:s.dateStr, start:minutesToTime(s.start), end:minutesToTime(s.end),
+        title: t.title + (n>1?` (session ${i+1}/${n})`:''), cat:t.cat, remind:15, priority:t.priority, ptype:'flexible', taskId:t.id });
+    });
+    if(n>0) saveOneOffs();
+    summary.push({ title:t.title, planned:n, remaining: result.remaining, bufferDays: result.bufferDays });
+  });
+
+  document.getElementById('autoplan-results').innerHTML = summary.map(s=>{
+    if(s.planned===0) return `<div class="task-row"><div class="task-body"><div class="task-title">${escapeHtml(s.title)}</div><div class="task-meta">No free time found before its deadline.</div></div></div>`;
+    return `<div class="task-row"><div class="task-body"><div class="task-title">${escapeHtml(s.title)}</div>
+      <div class="task-meta">${s.planned} session${s.planned>1?'s':''} scheduled${s.remaining>0?', '+minutesLabel(s.remaining)+' left unplaced':''}${s.remaining<=0?', '+s.bufferDays+'d buffer left':''}</div></div></div>`;
+  }).join('');
+  autoplanOverlay.classList.add('show');
+  renderTasksView();
+  renderDayView();
+}
+
+// ---- reschedule flow ----
+const reschedOverlay = document.getElementById('reschedule-overlay');
+let reschedulingInfo = null;
+function openRescheduleModal(blockId, isRecurring){
+  const d = activeDate();
+  const b = getOccurrencesForDate(d).find(x=>x.id===blockId);
+  if(!b) return;
+  reschedulingInfo = { id:b.id, isRecurring, seriesId:b.seriesId, occKey:b.occKey, date:formatDateStr(d), title:b.title, cat:b.cat, remind:b.remind, priority:b.priority, ptype:b.ptype, duration: toMinutes(b.end)-toMinutes(b.start) };
+  document.getElementById('resched-title').textContent = b.title;
+  document.getElementById('resched-fixed-warning').style.display = b.ptype==='fixed' ? 'block' : 'none';
+  document.getElementById('resched-sub').textContent = `Currently ${DAYS[activeDayIndex]} ${d.getDate()}, ${fmt(b.start)}–${fmt(b.end)}. Free slots the same length this week:`;
+  const slots = computeFreeSlots(reschedulingInfo.duration, { excludeOccKey: b.occKey });
+  renderSlotButtons(document.getElementById('resched-slots'), slots, performReschedule);
+  reschedOverlay.classList.add('show');
+}
+document.getElementById('resched-cancel').addEventListener('click', ()=> reschedOverlay.classList.remove('show'));
+reschedOverlay.addEventListener('click', e=>{ if(e.target===reschedOverlay) reschedOverlay.classList.remove('show'); });
+function performReschedule(slot){
+  const info = reschedulingInfo;
+  if(info.isRecurring){ if(!exceptions[info.date]) exceptions[info.date]={}; exceptions[info.date][info.seriesId]={type:'skip'}; saveExceptions(); }
+  else { oneOffs = oneOffs.filter(o=>o.id!==info.id); saveOneOffs(); }
+  oneOffs.push({ id:cid(), date:slot.dateStr, start:minutesToTime(slot.start), end:minutesToTime(slot.end), title:info.title, cat:info.cat, remind:info.remind, priority:info.priority, ptype:info.ptype });
+  saveOneOffs();
+  reschedOverlay.classList.remove('show');
+  const targetIdx = currentWeekDates().findIndex(d=>formatDateStr(d)===slot.dateStr);
+  if(targetIdx>=0) activeDayIndex = targetIdx;
+  renderDayPills(); renderDayView();
+}
+
+// ---- find a time flow ----
+const findOverlay = document.getElementById('find-overlay');
+let ftCat='school';
+function openFindTimeModal(){
+  document.getElementById('ft-title').value=''; document.getElementById('ft-duration').value='60'; document.getElementById('ft-slots').innerHTML='';
+  ftCat='school'; renderFtCatPick(); findOverlay.classList.add('show');
+}
+function renderFtCatPick(){
+  const elp = document.getElementById('ft-cat-pick');
+  elp.innerHTML = Object.keys(CATS).map(k=>`<button data-cat="${k}" class="${k===ftCat?'sel':''}" style="${k===ftCat?'background:'+CATS[k].color+';':''}">${k}</button>`).join('');
+  elp.querySelectorAll('button').forEach(btn=> btn.addEventListener('click', ()=>{ ftCat=btn.dataset.cat; renderFtCatPick(); }));
+}
+document.getElementById('ft-cancel').addEventListener('click', ()=> findOverlay.classList.remove('show'));
+findOverlay.addEventListener('click', e=>{ if(e.target===findOverlay) findOverlay.classList.remove('show'); });
+document.getElementById('ft-search-btn').addEventListener('click', ()=>{
+  const duration = Number(document.getElementById('ft-duration').value);
+  const slots = computeFreeSlots(duration, {});
+  renderSlotButtons(document.getElementById('ft-slots'), slots, (slot)=>{
+    const title = document.getElementById('ft-title').value.trim() || 'Untitled activity';
+    oneOffs.push({ id:cid(), date:slot.dateStr, start:minutesToTime(slot.start), end:minutesToTime(slot.end), title, cat:ftCat, remind:10, priority:'medium', ptype:'flexible' });
+    saveOneOffs(); findOverlay.classList.remove('show');
+    const targetIdx = currentWeekDates().findIndex(d=>formatDateStr(d)===slot.dateStr);
+    if(targetIdx>=0) activeDayIndex = targetIdx;
+    renderDayPills(); renderDayView();
+  });
+});
+
+// ---- add / edit modal ----
+const overlay = document.getElementById('overlay');
+let editingSeriesId=null, editingOneOffId=null, selectedCat='school', selectedDays=new Set(), selectedPriority='medium', selectedType='flexible';
+
+function currentModalConflictCheck(){
+  const start = document.getElementById('f-start').value, end = document.getElementById('f-end').value;
+  const warnEl = document.getElementById('conflict-warning');
+  if(!start || !end || toMinutes(end)<=toMinutes(start)){ warnEl.classList.remove('show'); return; }
+  const dates = currentWeekDates();
+  let conflictLines = [];
+  const daysToCheck = editingOneOffId ? [weekdayName(activeDate())] : [...selectedDays];
+  daysToCheck.forEach(dayName=>{
+    const idx = DAYS.indexOf(dayName);
+    const d = editingOneOffId ? activeDate() : dates[idx];
+    const excludeKey = editingOneOffId || editingSeriesId;
+    const conflicts = findConflicts(d, toMinutes(start), toMinutes(end), excludeKey);
+    if(conflicts.length) conflictLines.push(dayName+': overlaps '+conflicts.join(', '));
+  });
+  if(conflictLines.length){ warnEl.textContent = 'Heads up — this overlaps something else: '+conflictLines.join(' | '); warnEl.classList.add('show'); }
+  else warnEl.classList.remove('show');
+}
+
+function openModal(id, isRecurring){
+  document.getElementById('form-error').style.display='none';
+  document.getElementById('conflict-warning').classList.remove('show');
+  const deleteSeriesBtn = document.getElementById('delete-series-btn');
+  const repeatField = document.getElementById('repeat-field');
+
+  if(id && isRecurring){
+    const b = getOccurrencesForDate(activeDate()).find(x=>x.id===id);
+    editingSeriesId=b.seriesId; editingOneOffId=null;
+    document.getElementById('modal-title').textContent='Edit recurring activity';
+    document.getElementById('f-title').value=b.title; document.getElementById('f-start').value=b.start; document.getElementById('f-end').value=b.end;
+    document.getElementById('f-remind').value=String(b.remind||0);
+    selectedCat=b.cat; selectedPriority=b.priority||'medium'; selectedType=b.ptype||'flexible';
+    selectedDays = new Set(seriesDays(b.seriesId));
+    deleteSeriesBtn.style.display='block'; repeatField.style.display='block';
+  } else if(id && !isRecurring){
+    const b = oneOffs.find(x=>x.id===id);
+    editingSeriesId=null; editingOneOffId=b.id;
+    document.getElementById('modal-title').textContent='Edit this activity';
+    document.getElementById('f-title').value=b.title; document.getElementById('f-start').value=b.start; document.getElementById('f-end').value=b.end;
+    document.getElementById('f-remind').value=String(b.remind||0);
+    selectedCat=b.cat; selectedPriority=b.priority||'medium'; selectedType=b.ptype||'flexible'; selectedDays=new Set();
+    deleteSeriesBtn.style.display='none'; repeatField.style.display='none';
+  } else {
+    editingSeriesId=null; editingOneOffId=null;
+    document.getElementById('modal-title').textContent='Add a block';
+    document.getElementById('f-title').value=''; document.getElementById('f-start').value=''; document.getElementById('f-end').value='';
+    document.getElementById('f-remind').value='10';
+    selectedCat='school'; selectedPriority='medium'; selectedType='flexible'; selectedDays=new Set([DAYS[activeDayIndex]]);
+    deleteSeriesBtn.style.display='none'; repeatField.style.display='block';
+  }
+  renderCatPick(); renderPriorityPick(); renderTypePick(); renderRepeatPick();
+  currentModalConflictCheck();
+  overlay.classList.add('show');
+}
+function closeModal(){ overlay.classList.remove('show'); editingSeriesId=null; editingOneOffId=null; }
+document.getElementById('cancel-btn').addEventListener('click', closeModal);
+overlay.addEventListener('click', e=>{ if(e.target===overlay) closeModal(); });
+document.getElementById('f-start').addEventListener('input', currentModalConflictCheck);
+document.getElementById('f-end').addEventListener('input', currentModalConflictCheck);
+
+function renderCatPick(){
+  const elp = document.getElementById('cat-pick');
+  elp.innerHTML = Object.keys(CATS).map(k=>`<button data-cat="${k}" class="${k===selectedCat?'sel':''}" style="${k===selectedCat?'background:'+CATS[k].color+';':''}">${k}</button>`).join('');
+  elp.querySelectorAll('button').forEach(btn=> btn.addEventListener('click', ()=>{ selectedCat=btn.dataset.cat; renderCatPick(); }));
+}
+function renderPriorityPick(){
+  const elp = document.getElementById('priority-pick');
+  elp.innerHTML = ['high','medium','low'].map(p=>`<button data-p="${p}" class="${p===selectedPriority?'sel priority-'+p:''}">${p}</button>`).join('');
+  elp.querySelectorAll('button').forEach(btn=> btn.addEventListener('click', ()=>{ selectedPriority=btn.dataset.p; renderPriorityPick(); }));
+}
+function renderTypePick(){
+  const elp = document.getElementById('type-pick');
+  elp.innerHTML = ['fixed','flexible'].map(p=>`<button data-t="${p}" class="${p===selectedType?'sel type-'+p:''}">${p}</button>`).join('');
+  elp.querySelectorAll('button').forEach(btn=> btn.addEventListener('click', ()=>{ selectedType=btn.dataset.t; renderTypePick(); }));
+}
+function renderRepeatPick(){
+  const elp = document.getElementById('repeat-pick');
+  elp.innerHTML = DAYS.map(d=>`<button data-day="${d}" class="${selectedDays.has(d)?'sel':''}">${d}</button>`).join('');
+  elp.querySelectorAll('button').forEach(btn=> btn.addEventListener('click', ()=>{ const dd=btn.dataset.day; if(selectedDays.has(dd)) selectedDays.delete(dd); else selectedDays.add(dd); renderRepeatPick(); currentModalConflictCheck(); }));
+}
+
+document.getElementById('delete-series-btn').addEventListener('click', ()=>{
+  if(!editingSeriesId) return;
+  const removedPerDay = {};
+  DAYS.forEach(d=>{ removedPerDay[d] = rules[d].filter(b=>b.seriesId===editingSeriesId); rules[d]=rules[d].filter(b=>b.seriesId!==editingSeriesId); });
+  saveRules(); closeModal(); renderDayView();
+  showToast('Activity removed from all its days.', ()=>{ DAYS.forEach(d=> rules[d]=rules[d].concat(removedPerDay[d])); saveRules(); renderDayView(); });
+});
+
+document.getElementById('save-btn').addEventListener('click', ()=>{
+  const title = document.getElementById('f-title').value.trim();
+  const start = document.getElementById('f-start').value, end = document.getElementById('f-end').value;
+  const remind = Number(document.getElementById('f-remind').value);
+  const errEl = document.getElementById('form-error');
+  if(!title || !start || !end){ errEl.textContent='Fill in a title, start time and end time.'; errEl.style.display='block'; return; }
+  if(toMinutes(end)<=toMinutes(start)){ errEl.textContent='End time must be after start time.'; errEl.style.display='block'; return; }
+
+  if(editingOneOffId){
+    const b = oneOffs.find(x=>x.id===editingOneOffId);
+    b.title=title; b.start=start; b.end=end; b.cat=selectedCat; b.remind=remind; b.priority=selectedPriority; b.ptype=selectedType;
+    saveOneOffs(); errEl.style.display='none'; closeModal(); renderDayView(); return;
+  }
+  if(selectedDays.size===0){ errEl.textContent='Pick at least one day.'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+
+  const seriesId = editingSeriesId || cid();
+  DAYS.forEach(d=>{ if(!selectedDays.has(d)) rules[d]=rules[d].filter(b=>b.seriesId!==seriesId); });
+  selectedDays.forEach(d=>{
+    const existing = rules[d].find(b=>b.seriesId===seriesId);
+    if(existing){ existing.title=title; existing.start=start; existing.end=end; existing.cat=selectedCat; existing.remind=remind; existing.priority=selectedPriority; existing.ptype=selectedType; }
+    else rules[d].push({ id:cid(), seriesId, title, start, end, cat:selectedCat, remind, priority:selectedPriority, ptype:selectedType });
+  });
+  saveRules(); closeModal(); renderDayView(); checkReminders();
+});
+
+// ---- settings modal ----
+const settingsOverlay = document.getElementById('settings-overlay');
+document.getElementById('settings-btn').addEventListener('click', ()=>{
+  document.getElementById('st-start').value = settings.dayStart;
+  document.getElementById('st-end').value = settings.dayEnd;
+  document.getElementById('st-buffer').value = String(settings.buffer);
+  settingsOverlay.classList.add('show');
+});
+document.getElementById('st-close').addEventListener('click', ()=> settingsOverlay.classList.remove('show'));
+settingsOverlay.addEventListener('click', e=>{ if(e.target===settingsOverlay) settingsOverlay.classList.remove('show'); });
+document.getElementById('st-save').addEventListener('click', ()=>{
+  settings.dayStart = document.getElementById('st-start').value || '06:00';
+  settings.dayEnd = document.getElementById('st-end').value || '22:00';
+  settings.buffer = Number(document.getElementById('st-buffer').value);
+  saveSettings();
+  settingsOverlay.classList.remove('show');
+  showToast('Settings saved.', ()=>{});
+});
+document.getElementById('st-export').addEventListener('click', ()=>{
+  const backup = { rules, exceptions, oneOffs, tasks, statuses, settings, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'orbit-backup.json'; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+});
+document.getElementById('st-import').addEventListener('change', (e)=>{
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const parsed = JSON.parse(reader.result);
+      if(parsed.rules) rules = parsed.rules;
+      if(parsed.exceptions) exceptions = parsed.exceptions;
+      if(parsed.oneOffs) oneOffs = parsed.oneOffs;
+      if(parsed.tasks) tasks = parsed.tasks;
+      if(parsed.statuses) statuses = parsed.statuses;
+      if(parsed.settings) settings = parsed.settings;
+      saveRules(); saveExceptions(); saveOneOffs(); saveTasks(); saveStatuses(); saveSettings();
+      settingsOverlay.classList.remove('show');
+      refreshAll();
+      showToast('Backup imported.', ()=>{});
+    } catch(err){ alert('That file could not be read as an Orbit backup.'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+
+// ---- PWA / installable app ----
+let deferredInstallPrompt = null;
+const installBtn = document.getElementById('install-btn');
+
+function isIosDevice(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function isStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+}
+
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if(installBtn && !isStandalone()) installBtn.style.display = 'inline-block';
+});
+
+if(installBtn){
+  installBtn.addEventListener('click', async ()=>{
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      const result = await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      installBtn.style.display = 'none';
+      return;
+    }
+    if(isIosDevice() && !isStandalone()){
+      alert('To install Orbit on iPhone/iPad: tap Share in Safari, then choose “Add to Home Screen”.');
+    }
+  });
+}
+
+window.addEventListener('appinstalled', ()=>{
+  deferredInstallPrompt = null;
+  if(installBtn) installBtn.style.display = 'none';
+  showToast('Orbit installed.', ()=>{});
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+
+if(isIosDevice() && !isStandalone() && installBtn){
+  installBtn.textContent = 'Add to Home Screen';
+  installBtn.style.display = 'inline-block';
+}
+
+// ---- init ----
+refreshAll();
+setTab('day');
+</script>
+</body>
+</html>
